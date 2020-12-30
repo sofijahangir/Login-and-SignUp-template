@@ -10,10 +10,7 @@ const user_Schema = new mongoose.Schema({
     password:{
         type: String,
         required:true
-    },
-    tokens:[{
-        token: String
-    }]
+    }
 })
 
 user_Schema.pre('save', async function(req,res,next) {
@@ -27,8 +24,6 @@ user_Schema.pre('save', async function(req,res,next) {
 user_Schema.methods.genAuthToken = async function(){
     const user = this
     const token = jwt.sign({_id:user._id} , process.env.JWT_TOKEN);
-    user.tokens = user.tokens.concat({token})
-    await user.save();
     return token;
 }
 
@@ -38,7 +33,6 @@ user_Schema.statics.findByCredentials = async function(email , password){
         throw new Error("Invalid Credentials");
     }
     const isPasswordMatch = await bcrypt.compare(password, user.password)
-    console.log(isPasswordMatch)
     if(!isPasswordMatch){
         throw new Error("Invalid credentials");
     }
