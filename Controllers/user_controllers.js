@@ -16,7 +16,8 @@ exports.signup = async (req,res) => {
     const user = new User(req.body);
     try {
         await user.save();
-        const token = user.genAuthToken();
+        const token = await user.genAuthToken();
+        // console.log(token);
         res.status(401).send({user: user, token: token})
     } catch (error) {
         res.status(401).send({error:error.message})
