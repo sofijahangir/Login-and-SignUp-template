@@ -1,18 +1,25 @@
 const jwt = require('jsonwebtoken');
 const User = require('./../Model/user_model');
 
-exports.auth = async (req, res, next) => {
-    const token = req.headers('Authorization').split(' ')[1];
-    const data = jwt.verify(token , process.env.JWT_TOKEN);
+const auth = async (req,res,next) => {
     try {
-        const user = await User.findOne({_id: data._id , "tokens.token": token})
+        const token = req.header("Authorization").replace("Bearer ","");
+        const data = jwt.verify(token , process.env.JWT_TOKEN);
+        const user = await User.findById({_id: data._id});
         if(!user){
-            throw new Error("User not found")
+            res.json({
+                "message":"User not found"
+            });
         }
-        req.user = user
-        req.token = token
+        req.profile = user;
         next();
     } catch (error) {
-        res.status(401).send({error: "not Authorized to access"})
+        res.json({
+            error:"Not Authorized"
+        })
     }
 }
+
+
+
+module.exports = auth;
